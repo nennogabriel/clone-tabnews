@@ -2,14 +2,12 @@ import database from "infra/database.js";
 
 async function status(request, response) {
   const updatedAt = new Date().toISOString();
-  const getPostgresVersion = database.query("SHOW server_version;");
 
-  const getMaxConnections = database.query({
-    text: "SHOW max_connections; ",
-  });
-  const getCurrentConnections = database.query({
-    text: "SELECT COUNT(*) FROM pg_stat_activity; ",
-  });
+  const getPostgresVersion = database.query("SHOW server_version;");
+  const getMaxConnections = database.query("SHOW max_connections");
+  const getCurrentConnections = database.query(
+    "SELECT COUNT(*) FROM pg_stat_activity"
+  );
 
   const result = await Promise.all([
     getPostgresVersion,
