@@ -2,20 +2,30 @@ import database from "infra/database.js";
 
 async function status(request, response) {
   const updatedAt = new Date().toISOString();
-  const reqMaxConnections = database.query({
+  const getPostgresVersion = database.query("SHOW server_version;");
+
+  const getMaxConnections = database.query({
     text: "SHOW max_connections; ",
   });
-  const reqCurrentConnections = database.query({
+  const getCurrentConnections = database.query({
     text: "SELECT COUNT(*) FROM pg_stat_activity; ",
   });
 
-  const result = await Promise.all([reqMaxConnections, reqCurrentConnections]);
+  const result = await Promise.all([
+    getPostgresVersion,
+    getMaxConnections,
+    getCurrentConnections,
+  ]);
 
-  const maxConnections = Number(result[0].rows[0].max_connections);
-  const openConnections = Number(result[1].rows[0].count);
+  console.log(result[0].rows[0]);
+
+  const postgresVersion = result[0].rows[0].server_version;
+  const maxConnections = Number(result[1].rows[0].max_connections);
+  const openConnections = Number(result[2].rows[0].count);
 
   response.status(200).json({
     updated_at: updatedAt,
+    postgres_version: postgresVersion,
     max_connections: maxConnections,
     open_connections: openConnections,
   });
