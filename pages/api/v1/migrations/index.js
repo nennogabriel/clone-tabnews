@@ -3,6 +3,11 @@ import { join } from "node:path";
 import database from "infra/database";
 
 export default async function migrations(request, response) {
+  const allowedMethods = ["GET", "POST"];
+  if (!allowedMethods.includes(request.method)) {
+    return response.status(404).send("Not Found");
+  }
+
   const dbClient = await database.getNewClient();
   const defaultMigrationOptions = {
     dbClient,
@@ -30,6 +35,4 @@ export default async function migrations(request, response) {
     }
     response.status(200).json(migratedMigrations);
   }
-
-  response.status(404);
 }
