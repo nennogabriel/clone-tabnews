@@ -9,7 +9,7 @@ function checkPostgress() {
       return setTimeout(checkPostgress, 250); // 250ms atraso adicionado por estilo.
     }
 
-    console.log("\n✅ Postgres está pronto. \n");
+    console.log("\n🟢 Postgres está pronto. \n");
   }
 }
 
