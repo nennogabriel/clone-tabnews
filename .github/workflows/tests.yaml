@@ -1,4 +1,4 @@
-name: Atutomated Tests
+name: Automated Tests
 
 on:
   pull_request:
@@ -14,5 +14,7 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: "lts/hydrogen"
+          docker: true
+      - run: sudo apt-get update && sudo apt-get install -y docker-compose
       - run: npm ci
       - run: npm test
