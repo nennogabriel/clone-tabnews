@@ -11,6 +11,7 @@
     "lint:prettier:check": "prettier --check .",
     "lint:prettier:fix": "prettier --write .",
     "lint:eslint:check": "next lint --dir .",
+    "lint:commitlint:check": "npx commitlint --from $(git merge-base main HEAD) --to HEAD --verbose",
     "test": "npm run services:up && concurrently -n next,jest --hide next -k -s command-jest 'next dev' 'jest --runInBand' ",
     "test:watch": "jest --runInBand --watchAll",
     "migrations:create": "node-pg-migrate -m infra/migrations create",
