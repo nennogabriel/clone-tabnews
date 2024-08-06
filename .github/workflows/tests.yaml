@@ -8,12 +8,13 @@ on:
 jobs:
   jest:
     name: jest-ubuntu
-    runs-on: ubuntu-22.04
+    runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
         with:
           node-version: "lts/hydrogen"
           docker: true
+      - run: sudo apt-get update && sudo apt-get install -y docker-compose
       - run: npm ci
       - run: npm test
