@@ -6,14 +6,18 @@ beforeAll(async () => {
   await database.query("drop schema public cascade; create schema public;");
 });
 
-test("DELETE to /api/v1/migrations should return 404", async () => {
-  const response1 = await fetch("http://localhost:3000/api/v1/migrations", {
-    method: "DELETE",
+describe("DELETE /api/v1/migrations", () => {
+  describe("Anonymous user", () => {
+    test("try an invalid method", async () => {
+      const response1 = await fetch("http://localhost:3000/api/v1/migrations", {
+        method: "DELETE",
+      });
+
+      expect(response1.status).toBe(405);
+
+      const response2 = await fetch("http://localhost:3000/api/v1/status");
+      const response2Body = await response2.json();
+      expect(response2Body.dependencies.database.open_connections).toBe(1);
+    });
   });
-
-  expect(response1.status).toBe(405);
-
-  const response2 = await fetch("http://localhost:3000/api/v1/status");
-  const response2Body = await response2.json();
-  expect(response2Body.dependencies.database.open_connections).toBe(1);
 });
