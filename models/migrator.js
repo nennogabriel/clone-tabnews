@@ -24,7 +24,7 @@ async function listPendingMigrations() {
   }
 }
 
-async function runPendingMigrations(request, response) {
+async function runPendingMigrations() {
   let dbClient;
   try {
     dbClient = await database.getNewClient();
