@@ -5,7 +5,7 @@ import database from "infra/database";
 const defaultMigrationOptions = {
   dir: resolve("infra", "migrations"),
   direction: "up",
-  verbose: true,
+  log: () => {}, // trick to hide logs
   migrationsTable: "pgmigrations",
   dryRun: true,
 };
