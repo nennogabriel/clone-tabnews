@@ -39,11 +39,6 @@ async function create(userInputValues) {
   const newUser = await runInsertQuery(userInputValues);
   return newUser;
 
-  async function hashPasswordInObject(userInputValues) {
-    const hashedPassword = await password.hash(userInputValues.password);
-    userInputValues.password = hashedPassword;
-  }
-
   async function runInsertQuery(userInputValues) {
     const result = await database.query({
       text: `
@@ -75,10 +70,41 @@ async function update(username, userInputValues) {
     await validadeUniqueEmail(userInputValues.email);
   }
 
-  // const updatedUser = await runUpdateQuery(currentUser, userInputValues);
-  return currentUser; // updatedUser;
-}
+  if ("password" in userInputValues) {
+    await hashPasswordInObject(userInputValues);
+  }
 
+  const userWithNewValues = { ...currentUser, ...userInputValues };
+
+  const updatedUser = await runUpdateQuery(userWithNewValues);
+  return updatedUser;
+
+  async function runUpdateQuery(userWithNewValues) {
+    const result = await database.query({
+      text: `
+      UPDATE
+        users
+      SET
+        username = $2,
+        email = $3,
+        password = $4,
+        updated_at = timezone('utc', now())
+      WHERE
+        id = $1
+      RETURNING
+        * 
+      ;`,
+      values: [
+        userWithNewValues.id,
+        userWithNewValues.username,
+        userWithNewValues.email,
+        userWithNewValues.password,
+      ],
+    });
+
+    return result.rows[0];
+  }
+}
 async function validadeUniqueUsername(username) {
   const results = await database.query({
     text: `
@@ -117,6 +143,11 @@ async function validadeUniqueEmail(email) {
       action: "try again with a different email",
     });
   }
+}
+
+async function hashPasswordInObject(userInputValues) {
+  const hashedPassword = await password.hash(userInputValues.password);
+  userInputValues.password = hashedPassword;
 }
 
 const user = {
