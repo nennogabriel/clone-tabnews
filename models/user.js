@@ -32,52 +32,12 @@ async function findOneByUsername(username) {
 }
 
 async function create(userInputValues) {
-  await validadeUniqueEmail(userInputValues.email);
   await validadeUniqueUsername(userInputValues.username);
+  await validadeUniqueEmail(userInputValues.email);
   await hashPasswordInObject(userInputValues);
 
   const newUser = await runInsertQuery(userInputValues);
   return newUser;
-
-  async function validadeUniqueEmail(email) {
-    const results = await database.query({
-      text: `
-      SELECT
-        email
-      FROM
-        users
-      WHERE
-        LOWER(email) = LOWER($1)
-      ;`,
-      values: [email],
-    });
-    if (results.rowCount > 0) {
-      throw new ValidationError({
-        message: "Email already in use",
-        action: "try again with a different email",
-      });
-    }
-  }
-
-  async function validadeUniqueUsername(username) {
-    const results = await database.query({
-      text: `
-      SELECT
-        username
-      FROM
-        users
-      WHERE
-        LOWER(username) = LOWER($1)
-      ;`,
-      values: [username],
-    });
-    if (results.rowCount > 0) {
-      throw new ValidationError({
-        message: "Username already in use",
-        action: "try again with a different username",
-      });
-    }
-  }
 
   async function hashPasswordInObject(userInputValues) {
     const hashedPassword = await password.hash(userInputValues.password);
@@ -104,9 +64,65 @@ async function create(userInputValues) {
   }
 }
 
+async function update(username, userInputValues) {
+  const currentUser = await findOneByUsername(username);
+
+  if ("username" in userInputValues) {
+    await validadeUniqueUsername(userInputValues.username);
+  }
+
+  if ("email" in userInputValues) {
+    await validadeUniqueEmail(userInputValues.email);
+  }
+
+  // const updatedUser = await runUpdateQuery(currentUser, userInputValues);
+  return currentUser; // updatedUser;
+}
+
+async function validadeUniqueUsername(username) {
+  const results = await database.query({
+    text: `
+    SELECT
+      username
+    FROM
+      users
+    WHERE
+      LOWER(username) = LOWER($1)
+    ;`,
+    values: [username],
+  });
+  if (results.rowCount > 0) {
+    throw new ValidationError({
+      message: "Username already in use",
+      action: "try again with a different username",
+    });
+  }
+}
+
+async function validadeUniqueEmail(email) {
+  const results = await database.query({
+    text: `
+    SELECT
+      email
+    FROM
+      users
+    WHERE
+      LOWER(email) = LOWER($1)
+    ;`,
+    values: [email],
+  });
+  if (results.rowCount > 0) {
+    throw new ValidationError({
+      message: "Email already in use",
+      action: "try again with a different email",
+    });
+  }
+}
+
 const user = {
   create,
   findOneByUsername,
+  update,
 };
 
 export default user;
