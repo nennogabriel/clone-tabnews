@@ -10,28 +10,18 @@ beforeAll(async () => {
 describe("GET /api/v1/users", () => {
   describe("Anonymous user", () => {
     test("With an exact case match", async () => {
-      await fetch("http://localhost:3000/api/v1/users", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          username: "sameCase",
-          email: "same.case@example.com",
-          password: "hashed-password",
-        }),
-      });
+      const userCase = await orchestrator.createUser();
 
       const response = await fetch(
-        "http://localhost:3000/api/v1/users/sameCase",
+        `http://localhost:3000/api/v1/users/${userCase.username}`,
       );
       expect(response.status).toBe(200);
 
       const responseBody = await response.json();
       expect(responseBody).toEqual({
         id: responseBody.id,
-        username: "sameCase",
-        email: "same.case@example.com",
+        username: userCase.username,
+        email: userCase.email,
         password: responseBody.password,
         created_at: responseBody.created_at,
         updated_at: responseBody.updated_at,
@@ -42,16 +32,8 @@ describe("GET /api/v1/users", () => {
     });
 
     test("With case mismatch", async () => {
-      await fetch("http://localhost:3000/api/v1/users", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          username: "diffCase",
-          email: "diff.case@example.com",
-          password: "hashed-password",
-        }),
+      const userCase = await orchestrator.createUser({
+        username: "diffCASE",
       });
 
       const response = await fetch(
@@ -62,8 +44,8 @@ describe("GET /api/v1/users", () => {
       const responseBody = await response.json();
       expect(responseBody).toEqual({
         id: responseBody.id,
-        username: "diffCase",
-        email: "diff.case@example.com",
+        username: "diffCASE",
+        email: userCase.email,
         password: responseBody.password,
         created_at: responseBody.created_at,
         updated_at: responseBody.updated_at,
